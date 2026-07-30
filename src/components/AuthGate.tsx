@@ -188,7 +188,6 @@ export function AuthGate({
   if (justArrived) {
     return (
       <BirthdayCelebration
-        name={profile.display_name}
         onContinue={() => setJustArrived(false)}
       />
     )

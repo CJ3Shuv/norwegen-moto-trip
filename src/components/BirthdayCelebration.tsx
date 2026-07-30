@@ -29,13 +29,7 @@ function useConfettiPieces(count: number): ConfettiPiece[] {
   )
 }
 
-export function BirthdayCelebration({
-  name,
-  onContinue,
-}: {
-  name: string
-  onContinue: () => void
-}) {
+export function BirthdayCelebration({ onContinue }: { onContinue: () => void }) {
   const pieces = useConfettiPieces(70)
 
   return (
@@ -60,7 +54,7 @@ export function BirthdayCelebration({
 
       <div className="birthday-card">
         <div className="birthday-emoji">🎉🎂🏍️</div>
-        <h1>Herzlichen Glückwunsch, {name}!</h1>
+        <h1>Herzlichen Glückwunsch!</h1>
         <p>
           Zum Geburtstag gibt's kein Geschenkpapier, sondern eine ganze Tour:
           Dänemark und Norwegen, mit Fjorden, Pässen und Küstenstraßen. Lass

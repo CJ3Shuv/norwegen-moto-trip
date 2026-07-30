@@ -1,0 +1,133 @@
+.ideas-board {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 28px 20px;
+  background: var(--bg);
+}
+
+.ideas-card {
+  width: 100%;
+  max-width: 640px;
+}
+
+.ideas-card .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+
+.ideas-card h1 {
+  font-size: 24px;
+}
+
+.ideas-card .subtitle {
+  font-size: 14px;
+  color: var(--text);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+.ideas-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ideas-form textarea {
+  font-size: 15px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-h);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.ideas-form button {
+  align-self: flex-end;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 22px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.ideas-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ideas-error {
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.ideas-list {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ideas-empty {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ideas-note {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.ideas-note-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.ideas-note-head strong {
+  color: var(--text-h);
+}
+
+.ideas-note-date {
+  flex: 1;
+}
+
+.ideas-note-delete {
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.ideas-note-delete:hover {
+  background: var(--accent-bg);
+}
+
+.ideas-note p {
+  font-size: 14px;
+  color: var(--text-h);
+  line-height: 1.5;
+  margin-top: 2px;
+  white-space: pre-wrap;
+}

@@ -100,6 +100,37 @@ create policy "Users delete their own reaction"
   using (auth.uid() = user_id);
 ```
 
+Für den Tab "Ideen & Anmerkungen" (freies Feedback/Notizen, sichtbar für
+alle) zusätzlich:
+
+```sql
+create table if not exists public.trip_notes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users on delete cascade,
+  display_name text not null,
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.trip_notes enable row level security;
+
+drop policy if exists "Signed-in users can view all notes" on public.trip_notes;
+drop policy if exists "Users can add notes" on public.trip_notes;
+drop policy if exists "Users can delete their own notes" on public.trip_notes;
+
+create policy "Signed-in users can view all notes"
+  on public.trip_notes for select
+  using (auth.uid() is not null);
+
+create policy "Users can add notes"
+  on public.trip_notes for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete their own notes"
+  on public.trip_notes for delete
+  using (auth.uid() = user_id);
+```
+
 ## 5. Auf Vercel eintragen
 
 Im Vercel-Projekt unter **Settings → Environment Variables** dieselben zwei

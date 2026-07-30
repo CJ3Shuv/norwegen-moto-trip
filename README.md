@@ -18,13 +18,11 @@ Basiert auf React + Vite + Leaflet/OpenStreetMap (keine API-Keys nötig).
   - Vergleich der beiden Routen (Distanz, Fähre vs. Landweg)
   - Herz-Button + Wunsch-/Kommentarfeld pro Stopp, geteilt zwischen allen
     Nutzern (wer war wo, wer wünscht sich was)
-- **Eigene Route** (zweiter Tab): freies Planen wie bisher – Wegpunkte per
-  Klick auf die Karte oder Namenssuche (Nominatim) hinzufügen, per Drag & Drop
-  verschieben, Reihenfolge ändern, Gesamtstrecke/Fahrzeit berechnen; wird in
-  `localStorage` gespeichert
+- **Ideen & Anmerkungen** (zweiter Tab): offenes Feedback-Board – jeder kann
+  Ideen, Wünsche oder Verbesserungsvorschläge zur Tour hinterlassen, sichtbar
+  für alle Nutzer, eigene Notizen lassen sich wieder löschen
 - Helles/dunkles Kartendesign (CARTO) passend zum System-Farbschema
-- Mobile-optimiert (Bottom-Sheet auf dem Freiform-Planer, gestapeltes Layout
-  im Routen-Explorer)
+- Mobile-optimiert (gestapeltes Layout im Routen-Explorer)
 
 > Wird noch erweitert (z. B. echte Routenführung entlang von Straßen,
 > Höhenprofil, Etappenplanung).

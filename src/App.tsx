@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { AuthGate } from './components/AuthGate'
 import { RouteExplorer } from './components/RouteExplorer'
-import { FreeformPlanner } from './components/FreeformPlanner'
+import { IdeasBoard } from './components/IdeasBoard'
 import './App.css'
 
-type Tab = 'adventure' | 'freeform'
+type Tab = 'adventure' | 'ideas'
 
 function App() {
   const [tab, setTab] = useState<Tab>('adventure')
@@ -22,11 +22,8 @@ function App() {
               >
                 🗺️ Abenteuer-Routen
               </button>
-              <button
-                className={tab === 'freeform' ? 'active' : ''}
-                onClick={() => setTab('freeform')}
-              >
-                ✏️ Eigene Route
+              <button className={tab === 'ideas' ? 'active' : ''} onClick={() => setTab('ideas')}>
+                💡 Ideen & Anmerkungen
               </button>
             </div>
             <div className="topbar-user">
@@ -39,7 +36,7 @@ function App() {
             </div>
           </header>
           <main className="shell-body">
-            {tab === 'adventure' ? <RouteExplorer profile={profile} /> : <FreeformPlanner />}
+            {tab === 'adventure' ? <RouteExplorer profile={profile} /> : <IdeasBoard profile={profile} />}
           </main>
         </div>
       )}

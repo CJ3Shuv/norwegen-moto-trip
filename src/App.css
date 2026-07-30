@@ -5,25 +5,43 @@
 }
 
 .sidebar {
-  width: 340px;
+  width: 360px;
   flex-shrink: 0;
   background: var(--bg-2);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 14px;
   overflow-y: auto;
 }
 
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 18px 18px;
+}
+
+.sheet-handle {
+  display: none;
+}
+
+.sidebar .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
 .sidebar h1 {
-  font-size: 19px;
+  font-size: 21px;
+  margin-top: 2px;
 }
 
 .sidebar .subtitle {
   font-size: 13px;
   color: var(--text);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .search-form {
@@ -33,24 +51,32 @@
 
 .search-form input {
   flex: 1;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--bg);
   color: var(--text-h);
-  font-size: 14px;
+  font-size: 16px;
+}
+
+.search-form input:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .search-form button,
 .toolbar button {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   background: var(--accent);
   color: white;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 44px;
 }
 
 .search-form button:disabled {
@@ -70,15 +96,17 @@
 
 .toolbar button.secondary {
   background: var(--bg);
+  border-color: var(--border);
   color: var(--text-h);
 }
 
 .hint {
   font-size: 13px;
   background: var(--accent-bg);
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
   color: var(--text-h);
+  border-left: 3px solid var(--accent-2);
 }
 
 .stats {
@@ -90,20 +118,23 @@
   flex: 1;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 10px;
   text-align: center;
 }
 
 .stat .value {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 21px;
+  font-weight: 700;
   color: var(--text-h);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat .label {
-  font-size: 12px;
+  font-size: 11px;
   margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .waypoint-list {
@@ -122,18 +153,18 @@
   gap: 8px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 10px;
 }
 
 .waypoint-item .index {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-2);
   color: white;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,9 +190,10 @@
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  font-size: 14px;
-  padding: 2px 5px;
-  border-radius: 4px;
+  font-size: 15px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-height: 36px;
 }
 
 .waypoint-item .actions button:hover {
@@ -189,6 +221,7 @@
 .map-area .leaflet-container {
   height: 100%;
   width: 100%;
+  background: var(--bg);
 }
 
 .footer-note {
@@ -201,15 +234,89 @@
 
 @media (max-width: 720px) {
   .app {
-    flex-direction: column;
+    height: 100dvh;
   }
-  .sidebar {
-    width: 100%;
-    height: 45%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+
   .map-area {
-    height: 55%;
+    flex: 1;
+    height: 100%;
+    width: 100%;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    max-height: 78dvh;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transition: max-height 0.25s ease;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .sidebar.collapsed {
+    max-height: 104px;
+  }
+
+  .sidebar.collapsed .sidebar-content {
+    display: none;
+  }
+
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 10px 18px 8px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-h);
+  }
+
+  .sheet-handle .grip {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+
+  .sheet-handle .summary {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    padding-top: 6px;
+  }
+
+  .sheet-handle .summary .muted {
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .sheet-handle .chevron {
+    font-size: 13px;
+    color: var(--text);
+    padding-top: 6px;
+    transition: transform 0.2s ease;
+  }
+
+  .sidebar.expanded .sheet-handle .chevron {
+    transform: rotate(180deg);
+  }
+
+  .toolbar button,
+  .search-form button {
+    min-height: 46px;
   }
 }

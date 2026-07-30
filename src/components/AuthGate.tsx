@@ -1,7 +1,10 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient'
+import { STOPS } from '../data/stops'
 import './AuthGate.css'
+
+const HIGHLIGHT_STOP_IDS = ['trolltunga', 'preikestolen', 'geirangerfjord']
 
 export interface Profile {
   id: string
@@ -31,98 +34,13 @@ function SupabaseNotConfigured() {
   )
 }
 
-function AuthForm() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (!supabase) return
-    setLoading(true)
-    setError(null)
-    setInfo(null)
-
-    const { error: authError, data } =
-      mode === 'signin'
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password })
-
-    setLoading(false)
-    if (authError) {
-      setError(authError.message)
-      return
-    }
-    if (mode === 'signup' && !data.session) {
-      setInfo(
-        'Fast geschafft! Bitte bestätige deine E-Mail-Adresse über den Link, dann kannst du dich anmelden.',
-      )
-    }
-  }
-
-  return (
-    <div className="auth-screen">
-      <div className="auth-card">
-        <div className="auth-eyebrow">Motorrad Roadtrip</div>
-        <h1>🏍️ Bereit für dein Abenteuer?</h1>
-        <p className="auth-subtitle">
-          Melde dich an, um deine Route durch Skandinavien zu planen.
-        </p>
-
-        <div className="auth-tabs">
-          <button
-            type="button"
-            className={mode === 'signin' ? 'active' : ''}
-            onClick={() => setMode('signin')}
-          >
-            Anmelden
-          </button>
-          <button
-            type="button"
-            className={mode === 'signup' ? 'active' : ''}
-            onClick={() => setMode('signup')}
-          >
-            Registrieren
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <label>
-            E-Mail
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            Passwort
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-            />
-          </label>
-          {error && <p className="auth-error">{error}</p>}
-          {info && <p className="auth-info">{info}</p>}
-          <button type="submit" className="auth-submit" disabled={loading}>
-            {loading ? '…' : mode === 'signin' ? 'Los geht’s' : 'Konto erstellen'}
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-function ProfileSetup({ onSaved }: { onSaved: (profile: Profile) => void }) {
+function NameGate({
+  hasSession,
+  onDone,
+}: {
+  hasSession: boolean
+  onDone: (profile: Profile) => void
+}) {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -130,38 +48,72 @@ function ProfileSetup({ onSaved }: { onSaved: (profile: Profile) => void }) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!supabase) return
-    const { data: userData } = await supabase.auth.getUser()
-    const user = userData.user
-    if (!user) return
-
     setSaving(true)
     setError(null)
+
+    let userId: string
+    if (hasSession) {
+      const { data } = await supabase.auth.getUser()
+      if (!data.user) {
+        setSaving(false)
+        setError('Etwas ist schiefgelaufen. Bitte Seite neu laden.')
+        return
+      }
+      userId = data.user.id
+    } else {
+      const { data, error: signInError } = await supabase.auth.signInAnonymously()
+      if (signInError || !data.user) {
+        setSaving(false)
+        setError(signInError?.message ?? 'Anmeldung fehlgeschlagen.')
+        return
+      }
+      userId = data.user.id
+    }
+
     const trimmedName = name.trim()
-    const avatar = DEFAULT_AVATAR
     const { error: upsertError } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, display_name: trimmedName, avatar })
+      .upsert({ id: userId, display_name: trimmedName, avatar: DEFAULT_AVATAR })
     setSaving(false)
 
     if (upsertError) {
       setError(upsertError.message)
       return
     }
-    onSaved({ id: user.id, display_name: trimmedName, avatar })
+    onDone({ id: userId, display_name: trimmedName, avatar: DEFAULT_AVATAR })
   }
 
   return (
     <div className="auth-screen">
-      <div className="auth-card">
-        <div className="auth-eyebrow">Fast geschafft</div>
-        <h1>Wie dürfen wir dich nennen?</h1>
+      <div className="auth-card welcome-card">
+        <div className="auth-eyebrow">🎉 Alles Gute zum Geburtstag</div>
+        <h1>Was dich auf dieser Tour erwartet, Papa</h1>
+        <p className="auth-subtitle">
+          Als Geschenk lade ich dich ein: eine Motorradtour durch Dänemark und
+          Norwegen, mit Fjorden, Pässen und Küstenstraßen, die es in sich
+          haben. Wirf schon mal einen Blick auf ein paar Stationen, bevor wir
+          die Route gemeinsam planen.
+        </p>
+
+        <div className="welcome-highlights">
+          {HIGHLIGHT_STOP_IDS.map((id) => {
+            const stop = STOPS[id]
+            return (
+              <div className="welcome-highlight" key={id}>
+                {stop.image && <img src={stop.image.url} alt={stop.name} loading="lazy" />}
+                <div className="welcome-highlight-name">{stop.name}</div>
+              </div>
+            )
+          })}
+        </div>
+
         <form onSubmit={handleSubmit}>
           <label>
-            Name
+            Wie dürfen wir dich nennen?
             <input
               type="text"
               required
-              placeholder="z. B. Cedric"
+              placeholder="z. B. Papa"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
@@ -169,7 +121,7 @@ function ProfileSetup({ onSaved }: { onSaved: (profile: Profile) => void }) {
           </label>
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit" disabled={saving || !name.trim()}>
-            {saving ? '…' : 'Abenteuer starten'}
+            {saving ? '…' : 'Tour ansehen'}
           </button>
         </form>
       </div>
@@ -220,8 +172,9 @@ export function AuthGate({
 
   if (!isSupabaseConfigured) return <SupabaseNotConfigured />
   if (loading) return <div className="auth-screen" />
-  if (!session) return <AuthForm />
-  if (!profile) return <ProfileSetup onSaved={setProfile} />
+  if (!session || !profile) {
+    return <NameGate hasSession={Boolean(session)} onDone={setProfile} />
+  }
 
   return <>{children(profile, () => void supabase?.auth.signOut())}</>
 }

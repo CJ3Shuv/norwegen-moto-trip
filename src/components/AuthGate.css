@@ -21,6 +21,48 @@
   border: 1px solid var(--border);
 }
 
+.auth-card.welcome-card {
+  max-width: 620px;
+}
+
+.welcome-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.welcome-highlight {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+
+.welcome-highlight img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  display: block;
+}
+
+.welcome-highlight-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-h);
+  padding: 6px 8px;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .welcome-highlights {
+    grid-template-columns: 1fr;
+  }
+  .welcome-highlight img {
+    height: 130px;
+  }
+}
+
 .auth-eyebrow {
   font-size: 11px;
   font-weight: 700;
@@ -40,32 +82,6 @@
   color: var(--text);
   margin-top: 8px;
   line-height: 1.5;
-}
-
-.auth-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--bg-2);
-  border-radius: 10px;
-  padding: 4px;
-  margin-top: 20px;
-}
-
-.auth-tabs button {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 9px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.auth-tabs button.active {
-  background: var(--accent);
-  color: white;
 }
 
 .auth-card form {
@@ -116,14 +132,6 @@
   font-size: 13px;
   color: var(--danger);
   background: rgba(179, 57, 42, 0.1);
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.auth-info {
-  font-size: 13px;
-  color: var(--text-h);
-  background: var(--accent-bg);
   border-radius: 8px;
   padding: 8px 10px;
 }

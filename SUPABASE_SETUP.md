@@ -1,7 +1,10 @@
-# Supabase Setup (Login/Registrierung)
+# Supabase Setup (Login)
 
-Die App nutzt [Supabase](https://supabase.com) für echte Nutzerkonten
-(E-Mail + Passwort). Das Projekt musst du selbst anlegen — hier die Schritte:
+Die App nutzt [Supabase](https://supabase.com) für echte Nutzerkonten. Da die
+App nur für ein paar Personen gedacht ist, gibt es keine E-Mail/Passwort-Hürde:
+man trägt beim ersten Besuch nur seinen Namen ein, im Hintergrund läuft ein
+anonymer Supabase-Account. Das Projekt musst du selbst anlegen — hier die
+Schritte:
 
 ## 1. Projekt anlegen
 
@@ -24,7 +27,16 @@ cp .env.example .env.local
 
 Danach die Werte eintragen und den Dev-Server neu starten.
 
-## 3. Datenbank-Tabelle anlegen
+⚠️ Nur den **anon/public key** verwenden. Der `service_role`-Key bzw.
+`sb_secret_...`-Key darf niemals in die App oder ins Git-Repo — der hat
+vollen Admin-Zugriff auf die Datenbank.
+
+## 3. Anonyme Anmeldung aktivieren
+
+Im Dashboard unter **Authentication → Sign In / Providers → Anonymous
+Sign-Ins** den Schalter aktivieren. Ohne das schlägt die Namenseingabe fehl.
+
+## 4. Datenbank-Tabelle anlegen
 
 Im Supabase Dashboard unter **SQL Editor** folgendes ausführen:
 
@@ -51,13 +63,6 @@ create policy "Users can update own profile"
   using (auth.uid() = id);
 ```
 
-## 4. E-Mail-Bestätigung (optional)
-
-Standardmäßig verlangt Supabase eine E-Mail-Bestätigung nach der
-Registrierung. Für schnelles Testen kannst du das unter
-**Authentication → Providers → Email → Confirm email** deaktivieren.
-Für den echten Betrieb würde ich es aktiviert lassen.
-
 ## 5. Auf Vercel eintragen
 
 Im Vercel-Projekt unter **Settings → Environment Variables** dieselben zwei
@@ -68,3 +73,9 @@ neu deployen.
 
 Ohne diese Variablen zeigt die App einen Hinweisbildschirm
 ("Supabase ist noch nicht verbunden") statt des Logins.
+
+Hinweis zur anonymen Anmeldung: Die Sitzung hängt am Browser/Gerät (im
+`localStorage`), nicht an einem Passwort. Wer die Browserdaten löscht oder
+ein anderes Gerät nutzt, landet wieder auf der Namenseingabe und bekommt
+einen neuen (leeren) Eintrag. Da es keine privaten Nutzerdaten gibt – die
+Routen sind für alle gleich –, ist das ohne Nachteil.

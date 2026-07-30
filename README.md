@@ -5,7 +5,7 @@ Basiert auf React + Vite + Leaflet/OpenStreetMap (keine API-Keys nötig).
 
 ## Features (aktueller Stand)
 
-- **Login** (Supabase, E-Mail + Passwort) – beim ersten Besuch kurz Name angeben
+- **Login** (Supabase, anonym) – beim ersten Besuch reicht der Name, kein Passwort/E-Mail nötig
 - **Abenteuer-Routen**: zwei vorgeplante Touren durch Dänemark/Norwegen
   (Route 1 mit Fähre Hirtshals–Kristiansand, Route 2 komplett über Land via
   Schweden), für alle Nutzer gleich und fest hinterlegt

@@ -63,6 +63,43 @@ create policy "Users can update own profile"
   using (auth.uid() = id);
 ```
 
+Für das "Lieblingsziele & Wünsche"-Feature (Herz-Button + Kommentare an
+den Stopps, sichtbar für alle) zusätzlich:
+
+```sql
+create table if not exists public.stop_reactions (
+  stop_id text not null,
+  user_id uuid not null references auth.users on delete cascade,
+  display_name text not null,
+  wish text,
+  created_at timestamptz not null default now(),
+  primary key (stop_id, user_id)
+);
+
+alter table public.stop_reactions enable row level security;
+
+drop policy if exists "Signed-in users can view all reactions" on public.stop_reactions;
+drop policy if exists "Users manage their own reaction" on public.stop_reactions;
+drop policy if exists "Users update their own reaction" on public.stop_reactions;
+drop policy if exists "Users delete their own reaction" on public.stop_reactions;
+
+create policy "Signed-in users can view all reactions"
+  on public.stop_reactions for select
+  using (auth.uid() is not null);
+
+create policy "Users manage their own reaction"
+  on public.stop_reactions for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users update their own reaction"
+  on public.stop_reactions for update
+  using (auth.uid() = user_id);
+
+create policy "Users delete their own reaction"
+  on public.stop_reactions for delete
+  using (auth.uid() = user_id);
+```
+
 ## 5. Auf Vercel eintragen
 
 Im Vercel-Projekt unter **Settings → Environment Variables** dieselben zwei

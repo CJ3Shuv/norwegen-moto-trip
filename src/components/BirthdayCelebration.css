@@ -1,0 +1,84 @@
+.birthday-screen {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(193, 80, 46, 0.25), transparent 55%),
+    radial-gradient(circle at 80% 75%, rgba(47, 102, 144, 0.25), transparent 55%),
+    linear-gradient(165deg, #0d1620 0%, #101820 55%, #172029 100%);
+  overflow: hidden;
+  z-index: 3000;
+}
+
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(600deg);
+    opacity: 0.85;
+  }
+}
+
+.birthday-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--bg);
+  border-radius: 18px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+}
+
+.birthday-emoji {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.birthday-card h1 {
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.birthday-card p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.birthday-continue {
+  margin-top: 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent-2);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 13px 24px;
+  cursor: pointer;
+  min-height: 48px;
+}

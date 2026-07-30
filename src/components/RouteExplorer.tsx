@@ -3,6 +3,8 @@ import { ROUTES, ROUTE_COMPARISON } from '../data/routes'
 import { STOPS, type Stop } from '../data/stops'
 import { routeDistanceKm } from '../lib/geo'
 import { TAG_EMOJI } from '../lib/mapIcons'
+import { supabase } from '../lib/supabaseClient'
+import type { Profile } from './AuthGate'
 import { AdventureMap } from './AdventureMap'
 import './RouteExplorer.css'
 
@@ -12,8 +14,85 @@ const COUNTRY_FLAG: Record<Stop['country'], string> = {
   SE: '🇸🇪',
 }
 
+interface Reaction {
+  userId: string
+  displayName: string
+  wish: string | null
+}
+
+function useStopReactions(profile: Profile) {
+  const [reactions, setReactions] = useState<Record<string, Reaction[]>>({})
+
+  useEffect(() => {
+    if (!supabase) return
+    let cancelled = false
+    supabase
+      .from('stop_reactions')
+      .select('stop_id, user_id, display_name, wish')
+      .then(({ data }) => {
+        if (cancelled || !data) return
+        const grouped: Record<string, Reaction[]> = {}
+        for (const row of data) {
+          const list = grouped[row.stop_id] ?? (grouped[row.stop_id] = [])
+          list.push({ userId: row.user_id, displayName: row.display_name, wish: row.wish })
+        }
+        setReactions(grouped)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  async function toggleLike(stopId: string) {
+    if (!supabase) return
+    const mine = reactions[stopId]?.find((r) => r.userId === profile.id)
+    if (mine) {
+      const { error } = await supabase
+        .from('stop_reactions')
+        .delete()
+        .eq('stop_id', stopId)
+        .eq('user_id', profile.id)
+      if (error) return
+      setReactions((prev) => ({
+        ...prev,
+        [stopId]: (prev[stopId] ?? []).filter((r) => r.userId !== profile.id),
+      }))
+    } else {
+      const { error } = await supabase
+        .from('stop_reactions')
+        .upsert({ stop_id: stopId, user_id: profile.id, display_name: profile.display_name, wish: null })
+      if (error) return
+      setReactions((prev) => ({
+        ...prev,
+        [stopId]: [
+          ...(prev[stopId] ?? []),
+          { userId: profile.id, displayName: profile.display_name, wish: null },
+        ],
+      }))
+    }
+  }
+
+  async function submitWish(stopId: string, wishText: string) {
+    if (!supabase) return
+    const trimmed = wishText.trim() || null
+    const { error } = await supabase
+      .from('stop_reactions')
+      .upsert({ stop_id: stopId, user_id: profile.id, display_name: profile.display_name, wish: trimmed })
+    if (error) return
+    setReactions((prev) => {
+      const others = (prev[stopId] ?? []).filter((r) => r.userId !== profile.id)
+      return {
+        ...prev,
+        [stopId]: [...others, { userId: profile.id, displayName: profile.display_name, wish: trimmed }],
+      }
+    })
+  }
+
+  return { reactions, toggleLike, submitWish }
+}
+
 function StopThumb({ stop }: { stop: Stop }) {
-  if (!stop.image) {
+  if (!stop.images[0]) {
     return (
       <div className="stop-thumb stop-thumb-fallback">
         <span>{TAG_EMOJI[stop.tag]}</span>
@@ -22,20 +101,40 @@ function StopThumb({ stop }: { stop: Stop }) {
   }
   return (
     <div className="stop-thumb">
-      <img src={stop.image.url} alt={stop.name} loading="lazy" />
+      <img src={stop.images[0].url} alt={stop.name} loading="lazy" />
     </div>
   )
 }
 
-function StopModal({ stop, onClose }: { stop: Stop; onClose: () => void }) {
+function StopModal({
+  stop,
+  onClose,
+  reactions,
+  profile,
+  onSubmitWish,
+}: {
+  stop: Stop
+  onClose: () => void
+  reactions: Reaction[]
+  profile: Profile
+  onSubmitWish: (stopId: string, wish: string) => void
+}) {
+  const myReaction = reactions.find((r) => r.userId === profile.id)
+  const [wishDraft, setWishDraft] = useState(myReaction?.wish ?? '')
+  const others = reactions.filter((r) => r.wish)
+
   return (
     <div className="stop-modal-backdrop" onClick={onClose}>
       <div className="stop-modal" onClick={(e) => e.stopPropagation()}>
         <button className="stop-modal-close" onClick={onClose} aria-label="Schließen">
           ✕
         </button>
-        {stop.image ? (
-          <img className="stop-modal-image" src={stop.image.url} alt={stop.name} />
+        {stop.images.length > 0 ? (
+          <div className="stop-modal-carousel">
+            {stop.images.map((img, i) => (
+              <img key={i} src={img.url} alt={`${stop.name} ${i + 1}`} />
+            ))}
+          </div>
         ) : (
           <div className="stop-modal-image stop-thumb-fallback large">
             <span>{TAG_EMOJI[stop.tag]}</span>
@@ -48,26 +147,63 @@ function StopModal({ stop, onClose }: { stop: Stop; onClose: () => void }) {
           <h2>{stop.name}</h2>
           <p className="stop-modal-fact">{stop.fact}</p>
           <p className="stop-modal-description">{stop.description}</p>
-          {stop.image && (
+          {stop.images[0] && (
             <p className="stop-modal-credit">
-              Foto:{' '}
-              <a href={stop.image.sourceUrl} target="_blank" rel="noreferrer">
-                {stop.image.author}
-              </a>{' '}
-              ({stop.image.license}, Wikimedia Commons)
+              Fotos:{' '}
+              {stop.images.map((img, i) => (
+                <span key={i}>
+                  {i > 0 && ', '}
+                  <a href={img.sourceUrl} target="_blank" rel="noreferrer">
+                    {img.author}
+                  </a>{' '}
+                  ({img.license})
+                </span>
+              ))}
+              , Wikimedia Commons
             </p>
           )}
+
+          <div className="wish-section">
+            <div className="wish-heading">💬 Wünsche &amp; Eindrücke</div>
+            {others.length === 0 ? (
+              <p className="wish-empty">Noch keine Kommentare — sei der Erste.</p>
+            ) : (
+              <ul className="wish-list">
+                {others.map((r) => (
+                  <li key={r.userId}>
+                    <strong>{r.displayName}:</strong> {r.wish}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <form
+              className="wish-form"
+              onSubmit={(e) => {
+                e.preventDefault()
+                onSubmitWish(stop.id, wishDraft)
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Dein Kommentar oder Wunsch zu diesem Stopp…"
+                value={wishDraft}
+                onChange={(e) => setWishDraft(e.target.value)}
+              />
+              <button type="submit">Speichern</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-export function RouteExplorer() {
+export function RouteExplorer({ profile }: { profile: Profile }) {
   const [routeId, setRouteId] = useState<'route1' | 'route2'>('route1')
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
   const [modalStopId, setModalStopId] = useState<string | null>(null)
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const { reactions, toggleLike, submitWish } = useStopReactions(profile)
 
   const route = ROUTES.find((r) => r.id === routeId)!
   const stops = useMemo(() => route.stopIds.map((id) => STOPS[id]), [route])
@@ -144,41 +280,60 @@ export function RouteExplorer() {
         </div>
 
         <div className="timeline">
-          {stops.map((stop, i) => (
-            <div
-              key={stop.id}
-              data-stop-id={stop.id}
-              ref={(el) => {
-                cardRefs.current[stop.id] = el
-              }}
-              className={
-                stop.id === activeStopId ? 'stop-card active' : 'stop-card'
-              }
-              onClick={() => setActiveStopId(stop.id)}
-            >
-              <div className="stop-card-index">{i + 1}</div>
-              <StopThumb stop={stop} />
-              <div className="stop-card-body">
-                <div className="stop-card-heading">
-                  <span className="stop-flag">{COUNTRY_FLAG[stop.country]}</span>
-                  <h3>{stop.name}</h3>
-                  <span className="stop-tag-icon" title={stop.tag}>
-                    {TAG_EMOJI[stop.tag]}
-                  </span>
+          {stops.map((stop, i) => {
+            const stopReactions = reactions[stop.id] ?? []
+            const liked = stopReactions.some((r) => r.userId === profile.id)
+            return (
+              <div
+                key={stop.id}
+                data-stop-id={stop.id}
+                ref={(el) => {
+                  cardRefs.current[stop.id] = el
+                }}
+                className={stop.id === activeStopId ? 'stop-card active' : 'stop-card'}
+                onClick={() => setActiveStopId(stop.id)}
+              >
+                <div className="stop-card-index">{i + 1}</div>
+                <StopThumb stop={stop} />
+                <div className="stop-card-body">
+                  <div className="stop-card-heading">
+                    <span className="stop-flag">{COUNTRY_FLAG[stop.country]}</span>
+                    <h3>{stop.name}</h3>
+                    <span className="stop-tag-icon" title={stop.tag}>
+                      {TAG_EMOJI[stop.tag]}
+                    </span>
+                  </div>
+                  <p className="stop-fact">{stop.fact}</p>
+                  <div className="stop-card-footer">
+                    <button
+                      className="stop-detail-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setModalStopId(stop.id)
+                      }}
+                    >
+                      Details ansehen
+                    </button>
+                    <button
+                      className={liked ? 'stop-like-btn liked' : 'stop-like-btn'}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleLike(stop.id)
+                      }}
+                      title="Gefällt mir"
+                    >
+                      {liked ? '❤️' : '🤍'}
+                      {stopReactions.length > 0 && (
+                        <span className="stop-like-names">
+                          {stopReactions.map((r) => r.displayName).join(', ')}
+                        </span>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <p className="stop-fact">{stop.fact}</p>
-                <button
-                  className="stop-detail-btn"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setModalStopId(stop.id)
-                  }}
-                >
-                  Details ansehen
-                </button>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -186,7 +341,15 @@ export function RouteExplorer() {
         <AdventureMap stops={stops} activeStopId={activeStopId} onSelectStop={setActiveStopId} />
       </div>
 
-      {modalStop && <StopModal stop={modalStop} onClose={() => setModalStopId(null)} />}
+      {modalStop && (
+        <StopModal
+          stop={modalStop}
+          onClose={() => setModalStopId(null)}
+          reactions={reactions[modalStop.id] ?? []}
+          profile={profile}
+          onSubmitWish={submitWish}
+        />
+      )}
     </div>
   )
 }

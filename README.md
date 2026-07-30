@@ -5,14 +5,19 @@ Basiert auf React + Vite + Leaflet/OpenStreetMap (keine API-Keys nötig).
 
 ## Features (aktueller Stand)
 
-- **Login** (Supabase, anonym) – beim ersten Besuch reicht der Name, kein Passwort/E-Mail nötig
-- **Abenteuer-Routen**: zwei vorgeplante Touren durch Dänemark/Norwegen
-  (Route 1 mit Fähre Hirtshals–Kristiansand, Route 2 komplett über Land via
-  Schweden), für alle Nutzer gleich und fest hinterlegt
+- **Login** (Supabase, anonym) – beim ersten Besuch reicht der Name, kein
+  Passwort/E-Mail nötig; danach ein persönlicher Willkommens-Screen mit
+  Konfetti-Feier
+- **Abenteuer-Routen**: zwei vorgeplante, auf ca. eine Woche zugeschnittene
+  Touren durch Dänemark/Norwegen (Route 1 mit Fähre Hirtshals–Kristiansand,
+  Route 2 komplett über Land via Schweden), für alle Nutzer gleich und fest
+  hinterlegt
   - Scrollbare Stopp-Timeline mit echten Fotos (Wikimedia Commons, mit
-    Quellenangabe), Fun Facts und Detail-Ansicht pro Stopp
+    Quellenangabe), Fun Facts und Detail-Ansicht mit Bilder-Carousel pro Stopp
   - Karte folgt automatisch dem Stopp, an dem gerade gescrollt wird
   - Vergleich der beiden Routen (Distanz, Fähre vs. Landweg)
+  - Herz-Button + Wunsch-/Kommentarfeld pro Stopp, geteilt zwischen allen
+    Nutzern (wer war wo, wer wünscht sich was)
 - **Eigene Route** (zweiter Tab): freies Planen wie bisher – Wegpunkte per
   Klick auf die Karte oder Namenssuche (Nominatim) hinzufügen, per Drag & Drop
   verschieben, Reihenfolge ändern, Gesamtstrecke/Fahrzeit berechnen; wird in
@@ -22,7 +27,7 @@ Basiert auf React + Vite + Leaflet/OpenStreetMap (keine API-Keys nötig).
   im Routen-Explorer)
 
 > Wird noch erweitert (z. B. echte Routenführung entlang von Straßen,
-> Höhenprofil, Etappenplanung, gemeinsame Notizen/Wünsche für alle Nutzer).
+> Höhenprofil, Etappenplanung).
 
 ## Lokal starten
 

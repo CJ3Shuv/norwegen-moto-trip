@@ -2,9 +2,10 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient'
 import { STOPS } from '../data/stops'
+import { BirthdayCelebration } from './BirthdayCelebration'
 import './AuthGate.css'
 
-const HIGHLIGHT_STOP_IDS = ['trolltunga', 'preikestolen', 'geirangerfjord']
+const HIGHLIGHT_STOP_IDS = ['preikestolen', 'geirangerfjord', 'trollstigen']
 
 export interface Profile {
   id: string
@@ -100,7 +101,9 @@ function NameGate({
             const stop = STOPS[id]
             return (
               <div className="welcome-highlight" key={id}>
-                {stop.image && <img src={stop.image.url} alt={stop.name} loading="lazy" />}
+                {stop.images[0] && (
+                  <img src={stop.images[0].url} alt={stop.name} loading="lazy" />
+                )}
                 <div className="welcome-highlight-name">{stop.name}</div>
               </div>
             )
@@ -108,17 +111,15 @@ function NameGate({
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label>
-            Wie dürfen wir dich nennen?
-            <input
-              type="text"
-              required
-              placeholder="z. B. Papa"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-            />
-          </label>
+          <input
+            type="text"
+            required
+            placeholder="Dein Name"
+            aria-label="Dein Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+          />
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit" disabled={saving || !name.trim()}>
             {saving ? '…' : 'Tour ansehen'}
@@ -137,6 +138,7 @@ export function AuthGate({
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [justArrived, setJustArrived] = useState(false)
 
   useEffect(() => {
     if (!supabase) {
@@ -173,7 +175,23 @@ export function AuthGate({
   if (!isSupabaseConfigured) return <SupabaseNotConfigured />
   if (loading) return <div className="auth-screen" />
   if (!session || !profile) {
-    return <NameGate hasSession={Boolean(session)} onDone={setProfile} />
+    return (
+      <NameGate
+        hasSession={Boolean(session)}
+        onDone={(p) => {
+          setProfile(p)
+          setJustArrived(true)
+        }}
+      />
+    )
+  }
+  if (justArrived) {
+    return (
+      <BirthdayCelebration
+        name={profile.display_name}
+        onContinue={() => setJustArrived(false)}
+      />
+    )
   }
 
   return <>{children(profile, () => void supabase?.auth.signOut())}</>

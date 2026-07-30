@@ -17,7 +17,6 @@ export const ROUTES: RouteDef[] = [
       'hirtshals-ferry',
       'lysebotn',
       'preikestolen',
-      'trolltunga',
       'voringsfossen',
       'bergen',
       'naeroyfjord',
@@ -25,7 +24,6 @@ export const ROUTES: RouteDef[] = [
       'sognefjellsvegen',
       'geirangerfjord',
       'trollstigen',
-      'atlanterhavsveien',
       'oslo',
       'oresund-bridge',
       'copenhagen',
@@ -46,7 +44,6 @@ export const ROUTES: RouteDef[] = [
       'svinesund-bridge',
       'lysebotn',
       'preikestolen',
-      'trolltunga',
       'voringsfossen',
       'bergen',
       'naeroyfjord',
@@ -54,7 +51,6 @@ export const ROUTES: RouteDef[] = [
       'sognefjellsvegen',
       'geirangerfjord',
       'trollstigen',
-      'atlanterhavsveien',
       'oslo',
       'return-home',
     ],
@@ -62,5 +58,6 @@ export const ROUTES: RouteDef[] = [
 ]
 
 export const ROUTE_COMPARISON =
+  'Realistisch für etwa eine Woche geplant – keine perfekte Route, sondern das, was sich tatsächlich fahren lässt. ' +
   'Route 1 spart durch die Fähre rund 500 km Umweg über Schweden, dafür bist du an feste Abfahrtszeiten gebunden. ' +
   'Route 2 ist flexibler und zeigt mehr von Schweden nebenbei, dafür ein paar hundert Kilometer mehr auf dem Tacho.'

@@ -39,7 +39,7 @@ function App() {
             </div>
           </header>
           <main className="shell-body">
-            {tab === 'adventure' ? <RouteExplorer /> : <FreeformPlanner />}
+            {tab === 'adventure' ? <RouteExplorer profile={profile} /> : <FreeformPlanner />}
           </main>
         </div>
       )}

@@ -5,25 +5,36 @@ Basiert auf React + Vite + Leaflet/OpenStreetMap (keine API-Keys nötig).
 
 ## Features (aktueller Stand)
 
-- Interaktive Karte (OpenStreetMap) mit Fokus auf Norwegen/Skandinavien
-- Wegpunkte per Klick auf die Karte hinzufügen
-- Orte per Namenssuche finden und als Stopp hinzufügen (Nominatim-Geocoding)
-- Marker per Drag & Drop verschieben
-- Reihenfolge der Stopps ändern (rauf/runter) oder entfernen
-- Automatische Berechnung von Gesamtstrecke (km, Luftlinie) und geschätzter Fahrzeit
-- Route wird automatisch im Browser gespeichert (`localStorage`)
+- **Login** (Supabase, E-Mail + Passwort) – beim ersten Besuch kurz Name angeben
+- **Abenteuer-Routen**: zwei vorgeplante Touren durch Dänemark/Norwegen
+  (Route 1 mit Fähre Hirtshals–Kristiansand, Route 2 komplett über Land via
+  Schweden), für alle Nutzer gleich und fest hinterlegt
+  - Scrollbare Stopp-Timeline mit echten Fotos (Wikimedia Commons, mit
+    Quellenangabe), Fun Facts und Detail-Ansicht pro Stopp
+  - Karte folgt automatisch dem Stopp, an dem gerade gescrollt wird
+  - Vergleich der beiden Routen (Distanz, Fähre vs. Landweg)
+- **Eigene Route** (zweiter Tab): freies Planen wie bisher – Wegpunkte per
+  Klick auf die Karte oder Namenssuche (Nominatim) hinzufügen, per Drag & Drop
+  verschieben, Reihenfolge ändern, Gesamtstrecke/Fahrzeit berechnen; wird in
+  `localStorage` gespeichert
+- Helles/dunkles Kartendesign (CARTO) passend zum System-Farbschema
+- Mobile-optimiert (Bottom-Sheet auf dem Freiform-Planer, gestapeltes Layout
+  im Routen-Explorer)
 
-> Basisversion – wird noch erweitert (z. B. echte Routenführung entlang von
-> Straßen, Höhenprofil, Etappenplanung, Sehenswürdigkeiten, Export/Import der Route).
+> Wird noch erweitert (z. B. echte Routenführung entlang von Straßen,
+> Höhenprofil, Etappenplanung, gemeinsame Notizen/Wünsche für alle Nutzer).
 
 ## Lokal starten
 
 ```bash
 npm install
+cp .env.example .env.local   # siehe SUPABASE_SETUP.md
 npm run dev
 ```
 
-Die App läuft danach auf `http://localhost:5173`.
+Die App läuft danach auf `http://localhost:5173`. Ohne gültige
+Supabase-Zugangsdaten in `.env.local` zeigt die App einen Setup-Hinweis
+statt des Logins – siehe [SUPABASE_SETUP.md](./SUPABASE_SETUP.md).
 
 ## Build
 
@@ -55,6 +66,8 @@ Jeder Push auf `main` erzeugt danach automatisch ein neues Deployment.
 ## Tech-Stack
 
 - [Vite](https://vite.dev/) + React + TypeScript
+- [Supabase](https://supabase.com/) für Login/Nutzerkonten (siehe [SUPABASE_SETUP.md](./SUPABASE_SETUP.md))
 - [Leaflet](https://leafletjs.com/) / [react-leaflet](https://react-leaflet.js.org/) für die Karte
-- [OpenStreetMap](https://www.openstreetmap.org/) Kartendaten
+- [OpenStreetMap](https://www.openstreetmap.org/) / [CARTO](https://carto.com/) Kartendaten
 - [Nominatim](https://nominatim.org/) für die Ortssuche
+- [Wikimedia Commons](https://commons.wikimedia.org/) für die Stopp-Fotos (freie Lizenzen, Quellenangabe im Detail-Modal)
